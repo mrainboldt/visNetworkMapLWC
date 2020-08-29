@@ -14,4 +14,11 @@ Lightning web component that renders a network map on a contact record using the
 4. add Network Map component to page
  
 
-Viewing Network
+### Viewing Network
+(/images/Network.png)
+
+### Viewing Hierarchy
+(/images/Hierarchy.png)
+
+### Filter Menu
+(/images/Filter.png)
