@@ -1,6 +1,12 @@
 # Network Map using vis.js Network and NPSP Relationship & Affiliation
 Lightning web component that renders a network map on a contact record using the contacts NPSP Affiliations and NPSP Relationships.
 
+### Features
+ - Network view
+ - Hiearchy view
+ - Filtering
+ - SLDS icons and coloring
+
 #### Salesforce Environment Requirements
  - Lightning
  - API version > 49
@@ -15,10 +21,10 @@ Lightning web component that renders a network map on a contact record using the
  
 
 ### Viewing Network
-(/images/Network.png)
+![Screenshot of Network view](/images/Network.png)
 
 ### Viewing Hierarchy
-(/images/Hierarchy.png)
+![Screenshot of Hierarchy view](/images/Hierarchy.png)
 
 ### Filter Menu
-(/images/Filter.png)
+![Screenshot of filter menu](/images/Filter.png)
