@@ -24,6 +24,30 @@ global with sharing class NetworkMapExtension {
     }
 
     /**
+     * IN PROGRESS
+     * @description     should create a relationship between the two nodes
+     * @param  edgeJson json string of edge
+     * @param  recordId context record id
+     * @return          the new edge
+     */
+    @AuraEnabled
+    public static Edge createEdge(String edgeJson, String recordId){
+        Edge newEdge = (Edge)JSON.deserialize(edgeJson, Edge.class);
+        Entity_Link__c newLink = new Entity_Link__c();
+        newLink.Entity__c = newEdge.source;
+        newLink.Related_Entity__c = newEdge.to;
+        if(SObjectHelper.getObjectName(recordId) == 'Investigative_Report__c'){
+            newLink.Related_Report__c = recordId;
+        }
+        System.debug(newLink);
+        Database.insert(newLink);
+
+        newEdge.id = newLink.Id;
+        
+        return newEdge;
+    }
+
+    /**
      * @description     gets relationships for a contact record
      *                  including Contact, Account, Other Contacts related to Account,
      *                  NPSP Relationships, NPSP Affiliations
@@ -94,7 +118,7 @@ global with sharing class NetworkMapExtension {
             edge.label = relationship.npe4__Type__c;
             dataSet.edges.add(edge);
         }
-        
+
         for(npe5__Affiliation__c affl: [SELECT Id
                                             , npe5__Organization__c
                                             , npe5__Organization__r.Name 
