@@ -1,5 +1,14 @@
-global without sharing class NetworkMapExtension {
-
+/**
+ * @description extension class for NetworkMap LWC
+ * @author      M Rainboldt
+ * @created     AUG 2020
+ */
+global with sharing class NetworkMapExtension {
+    /**
+     * @description     get relationships based on the record id provided
+     * @param  recordId Id of the record in context
+     * @return          a json serialization of NetworkDataSet
+     */
     @AuraEnabled(cacheable=true)
     public static String getRelationships(String recordId)
     {
@@ -7,9 +16,6 @@ global without sharing class NetworkMapExtension {
         String dataSet;
         if(sObjName == 'Contact'){
             dataSet = getRelationshipsFromContact(recordId);
-        }else if(sObjName =='Investigative_Report__c')
-        {
-            dataSet = getRelationshipsFromReport(recordId);
         }else if(sObjName == 'Account')
         {
 
@@ -17,93 +23,13 @@ global without sharing class NetworkMapExtension {
         return dataSet;
     }
 
-    @AuraEnabled
-    public static Edge createEdge(String edgeJson, String recordId){
-        Edge newEdge = (Edge)JSON.deserialize(edgeJson, Edge.class);
-        Entity_Link__c newLink = new Entity_Link__c();
-        newLink.Entity__c = newEdge.source;
-        newLink.Related_Entity__c = newEdge.to;
-        if(SObjectHelper.getObjectName(recordId) == 'Investigative_Report__c'){
-            newLink.Related_Report__c = recordId;
-        }
-        System.debug(newLink);
-        Database.insert(newLink);
-
-        newEdge.id = newLink.Id;
-        
-        return newEdge;
-    }
-
-    private static String getRelationshipsFromReport(String recordId){
-        NetworkDataSet dataSet = new NetworkDataSet();
-        Set<Id> nodeIds = new Set<Id>();
-        for(Entity_Link__c link: (List<Entity_Link__c>) Database.query(
-                                'SELECT ' + SObjectHelper.generateQueryStringByObjectNameFullSOQL('Entity_Link__c', false, false)
-                                + ', Entity__r.Entity_Name__c'
-                                + ', Entity__r.Network_Icon__c'
-                                + ', Entity__r.Id'
-                                + ', Entity__r.Primary_Image_Id__c'
-                                + ', Entity__r.RecordType.DeveloperName'
-                                + ', Entity__r.RecordType.Name'
-                                + ', Related_Entity__r.Entity_Name__c'
-                                + ', Related_Entity__r.Network_Icon__c'
-                                + ', Related_Entity__r.Id'
-                                + ', Related_Entity__r.Primary_Image_Id__c'
-                                + ', Related_Entity__r.RecordType.DeveloperName'
-                                + ', Related_Entity__r.RecordType.Name'
-                                + ' FROM Entity_Link__c'
-                                + ' WHERE Related_Report__c = :recordId'))
-        {
-            if(!String.isBlank(link.Entity__c)
-                && !nodeIds.contains(link.Entity__c)){
-                dataSet.nodes.add(getNodeFromEntity(link.Entity__r));
-                nodeIds.add(link.Entity__c);
-            }
-            if(!String.isBlank(link.Related_Entity__c)
-                && !nodeIds.contains(link.Related_Entity__c)){
-                dataSet.nodes.add(getNodeFromEntity(link.Related_Entity__r));
-                nodeIds.add(link.Related_Entity__c);
-            }
-
-            if(String.isBlank(link.Entity__c)
-                || String.isBlank(link.Related_Entity__c)) continue; 
-
-            Edge edge = new Edge();
-            edge.source = link.Entity__c;
-            edge.to = link.Related_Entity__c;
-            edge.id = link.Id;
-            edge.label = link.Relationship__c;
-            dataSet.Edges.add(edge);
-        }
-        return JSON.serialize(dataSet);
-    }
-
-    private static Node getNodeFromEntity(Entity__c entity)
-    {
-        Node node = new Node();
-        node.id = entity.Id;
-        node.title = entity.Entity_Name__c;
-        node.shape = 'circularImage';
-        node.groupId = entity.RecordType.DeveloperName;
-        node.groupLabel = entity.RecordType.Name;
-        if(String.isBlank(entity.Primary_Image_Id__c)){
-            node.imageName =  entity.Network_Icon__c;
-            node.isSlds = true;
-        }else{
-            node.image = '/sfc/servlet.shepherd/version/download/' + entity.Primary_Image_Id__c;
-            node.isSlds = false;
-        }
-        
-        return node;
-    }
-
-    private static String getRelationshipsFromAccount(String recordId)
-    {
-        return '';
-    }
-
-
-
+    /**
+     * @description     gets relationships for a contact record
+     *                  including Contact, Account, Other Contacts related to Account,
+     *                  NPSP Relationships, NPSP Affiliations
+     * @param  recordId id of the contact record
+     * @return          json serialization of NetworkDataSet
+     */
     private static String getRelationshipsFromContact(String recordId)
     {
         NetworkDataSet dataSet = new NetworkDataSet();
@@ -168,7 +94,7 @@ global without sharing class NetworkMapExtension {
             edge.label = relationship.npe4__Type__c;
             dataSet.edges.add(edge);
         }
-        System.debug(LoggingLevel.INFO, dataSet.nodes.size());
+        
         for(npe5__Affiliation__c affl: [SELECT Id
                                             , npe5__Organization__c
                                             , npe5__Organization__r.Name 
@@ -197,7 +123,7 @@ global without sharing class NetworkMapExtension {
             edge.label = affl.npe5__Role__c;
             dataSet.edges.add(edge);
         }
-        System.debug(LoggingLevel.INFO, dataSet.nodes.size());
+
         for(Contact relContact: [SELECT Id
                                     , AccountId
                                     , Name 
@@ -223,31 +149,6 @@ global without sharing class NetworkMapExtension {
             edge.source = relContact.AccountId;
             edge.to = relContact.Id;
             edge.id = relContact.Id + '' + relContact.AccountId;
-            dataSet.edges.add(edge);
-        }
-        System.debug(LoggingLevel.INFO, dataSet.nodes.size());
-        return JSON.serialize(dataSet);
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static String getNPSPRelationships(String recordId)
-    {
-        NetworkDataSet dataSet = new NetworkDataSet();
-        for(npe4__Relationship__c relationship: (List<npe4__Relationship__c>)
-            Database.query(SObjectHelper.generateQueryStringByObjectName('npe4__Relationship__c', true)
-                                    + ' WHERE npe4__Contact__c = :recordId'))
-        {
-            Node node = new Node();
-            node.id = relationship.npe4__RelatedContact__c;
-            node.title = relationship.npe4__RelatedContact__r.Name;
-            node.shape = 'circularImage';
-            node.imageName =  'action/user_60.png';
-            dataSet.nodes.add(node);
-
-            Edge edge = new Edge();
-            edge.source = relationship.npe4__Contact__c;
-            edge.to = relationship.npe4__RelatedContact__c;
-            edge.id = relationship.Id;
             dataSet.edges.add(edge);
         }
 
