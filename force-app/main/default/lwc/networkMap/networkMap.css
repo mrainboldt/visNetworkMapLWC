@@ -1,0 +1,65 @@
+.background-img{
+    border: 1px solid grey;
+    background-color: grey;
+    background-repeat: no-repeat;
+    color: blue;
+    fill: green;
+    width: 60px;
+    height: 60px;
+    background-image: url("/resource/SLDS262/icons/action/edit_60.png");
+}
+div.vis-network div.vis-edit-mode div.vis-button.vis-edit
+, div.vis-network div.vis-manipulation div.vis-button.vis-edit{
+    background-image: url("/resource/SLDS262/icons/action/edit_60.png") !important;
+    background-size: 16px 16px;
+    background-position: 6px;
+}
+
+div.vis-network div.vis-edit-mode div.vis-button
+, div.vis-network div.vis-manipulation div.vis-button
+{
+    background-color: #0070d2;
+    border-color: #0070d2;
+    color: #fff;
+}
+
+div.vis-network div.vis-edit-mode div.vis-button:hover
+, div.vis-network div.vis-edit-mode div.vis-button:active
+, div.vis-network div.vis-manipulation div.vis-button:hover
+, div.vis-network div.vis-manipulation div.vis-button:active
+{
+    background-color: #195594;
+    border-color: #195594;
+}
+div.vis-network div.vis-manipulation div.vis-button.vis-add
+{
+    background-image: url("/resource/SLDS262/icons/action/new_60.png") !important;
+    background-size: 16px 16px;
+    background-position: 6px;
+}
+div.vis-network div.vis-manipulation div.vis-button.vis-connect
+{
+    background-image: url("/resource/SLDS262/icons/action/add_relationship_60.png") !important;
+    background-size: 16px 16px;
+    background-position: 6px;
+}
+div.vis-network div.vis-manipulation
+{
+    background: none;
+    border: none;
+}
+div.vis-network div.vis-manipulation div.vis-separator-line
+{
+    display: none;
+}
+div.vis-network div.vis-close
+{
+    background-image: url("/resource/SLDS262/icons/utility/close_60.png") !important;
+    background-size: 16px 16px;
+    background-position: 6px;
+    right: unset;
+    left: 225px;
+}
+canvas:focus{
+    outline: none;
+}

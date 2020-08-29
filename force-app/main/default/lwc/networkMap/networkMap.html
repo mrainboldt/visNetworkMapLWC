@@ -1,0 +1,51 @@
+<template>
+    <article class="slds-card">
+        <header class="slds-card__header slds-grid">
+            <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body slds-truncate">
+                    <h2>
+                        <span class="slds-text-heading_small">Network Map</span>
+                    </h2>
+                </div>
+            </div>
+        </header>
+        <div class="slds-card__body">
+            <template if:true={loading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+            <div class="slds-p-around_small">
+                <div class="slds-box">
+                    <div class="slds-grid slds-grid_align-spread">
+                        <div class="slds-col">
+                            <lightning-button-group>
+                                <lightning-button label="Default" variant={defaultVariant} onclick={renderDefault}></lightning-button>
+                                <lightning-button label="Hierarchy" variant={hierarchyVariant} onclick={renderHierarchy}></lightning-button>
+                            </lightning-button-group>
+                        </div>
+                        <div class="slds-col">
+                            <template if:true={groups}>
+                            <lightning-button-menu
+                                                icon-name="utility:filterList"
+                                                icon-size="large"
+                                                alternative-text="Filter"
+                                                variant="bare">
+                                    <template for:each={groups} for:item="groupOpt">                                            
+                                        <lightning-menu-item label={groupOpt.label} 
+                                                            value={groupOpt.value} 
+                                                            key={groupOpt.value}
+                                                            checked={groupOpt.isActive}
+                                                            onclick={handleGroupSelect}>
+                                        </lightning-menu-item>
+                                    </template>
+                            </lightning-button-menu>
+                        </template>
+                        </div>
+                    </div>
+                    <div class="slds-p-around_small">
+                        <div id="vis-network" data-id="vis-network" class="vis-network" style="resize:both;height:500px;" lwc:dom="manual"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</template>
